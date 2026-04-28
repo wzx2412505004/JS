@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axios & 防抖节流 Example</title>
+    <title>Axios & Swiper 整合示例</title>
+    <!-- 老师提供的 Swiper CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -65,29 +67,50 @@
             color: #e74c3c;
             font-weight: bold;
         }
-        
-        /* 新增：辅助展示防抖节流效果的样式 */
-        .code-block {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
+
+        /* Swiper 样式 */
+        .swiper {
+            width: 600px;
+            height: 300px;
             margin: 20px 0;
-            border-left: 3px solid #007bff;
         }
-        .code-title {
-            font-weight: bold;
-            color: #007bff;
-            margin-bottom: 10px;
+
+        .swiper-slide {
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f1f1f1;
+        }
+
+        .swiper-slide img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
         }
     </style>
 </head>
 
 <body>
+    <h1>Swiper 轮播示例</h1>
+    <div class="swiper">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide"><img src="https://picsum.photos/600/300?random=1" alt=""></div>
+            <div class="swiper-slide"><img src="https://picsum.photos/600/300?random=2" alt=""></div>
+            <div class="swiper-slide"><img src="https://picsum.photos/600/300?random=3" alt=""></div>
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+    </div>
+
+    <hr>
+
     <h1>Axios GET Request Example</h1>
     <button id="fetchButton">Fetch Users</button>
     <div id="result"></div>
 
-    <!-- 新增 POST 请求示例 -->
+    <!-- POST 请求示例 -->
     <hr>
     <h1>Axios POST Request Example</h1>
     <div class="form-group">
@@ -101,13 +124,13 @@
     <button id="postButton">提交数据</button>
     <div id="postResult"></div>
 
-    <!-- 新增 Async/Await GET 请求示例 -->
+    <!-- Async/Await GET 请求示例 -->
     <hr>
     <h1>Axios <span class="method-title">Async/Await</span> GET Request Example</h1>
     <button id="asyncFetchButton">Async 获取用户</button>
     <div id="asyncGetResult"></div>
 
-    <!-- 新增 Async/Await POST 请求示例 -->
+    <!-- Async/Await POST 请求示例 -->
     <hr>
     <h1>Axios <span class="method-title">Async/Await</span> POST Request Example</h1>
     <div class="form-group">
@@ -121,172 +144,140 @@
     <button id="asyncPostButton">Async 提交数据</button>
     <div id="asyncPostResult"></div>
 
-    <!--  新增：防抖节流 演示与代码展示  -->
-    <hr>
-    <h1>前端性能优化：<span class="method-title">防抖 & 节流</span></h1>
-    
-    <div class="code-block">
-        <div class="code-title">防抖函数 (debounce) 代码：</div>
-        <pre>
-function debounce(func, delay) {
-    let timer; // 定义一个定时器变量，用于存储setTimeout的返回值
-    return function() {
-        clearTimeout(timer); // 每次触发时，清除之前的定时器，取消之前等待执行的函数
-        timer = setTimeout(() => { // 重新设置一个定时器，delay毫秒后执行传入的函数
-            func.apply(this, arguments); // 修正this指向并传递所有参数
-        }, delay);
-    }
-}</pre>
-    </div>
-
-    <div class="code-block">
-        <div class="code-title">节流函数 (throttle) 代码：</div>
-        <pre>
-function throttle(func, delay) {
-    let lastTime = 0; // 记录上一次函数执行的时间戳
-    return function() {
-        const now = Date.now(); // 获取当前时间戳
-        // 判断当前时间与上次执行时间的差值是否大于等于指定的延迟时间
-        if (now - lastTime >= delay) {
-            func.apply(this, arguments); // 执行原函数并传递参数
-            lastTime = now; // 更新上一次执行的时间戳为当前时间
-        }
-    }
-}</pre>
-    </div>
-
-    <!-- 引入 Axios CDN -->
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <!-- 备用CDN：<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> -->
+    <!-- 引入 Axios 和老师提供的 Swiper CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/swiper@8/swiper-bundle.min.js"></script>
 
     <script>
-        // --- Axios 常规 GET 请求 ---
-        document.getElementById('fetchButton').addEventListener('click', () => {
-            axios.get('https://jsonplaceholder.typicode.com/users')
-                .then(response => {
-                    const users = response.data;
-                    let html = '<h3>用户列表 (常规GET)</h3><ul>';
-                    users.forEach(user => {
-                        html += `<li>ID: ${user.id}, 姓名: ${user.name}, 邮箱: ${user.email}</li>`;
-                    });
-                    html += '</ul>';
-                    document.getElementById('result').innerHTML = html;
-                })
-                .catch(error => {
-                    console.error('请求出错:', error);
-                    document.getElementById('result').innerHTML = '请求失败，请查看控制台。';
-                });
-        });
-
-        // --- Axios 常规 POST 请求 ---
-        document.getElementById('postButton').addEventListener('click', () => {
-            const title = document.getElementById('titleInput').value;
-            const body = document.getElementById('bodyInput').value;
-
-            if (!title || !body) {
-                document.getElementById('postResult').innerHTML = '请输入标题和内容！';
-                return;
-            }
-
-            axios.post('https://jsonplaceholder.typicode.com/posts', {
-                    title: title,
-                    body: body,
-                    userId: 1
-                })
-                .then(response => {
-                    document.getElementById('postResult').innerHTML = 
-                        `<h3>提交成功 (常规POST)</h3><p>返回ID: ${response.data.id}</p><pre>${JSON.stringify(response.data, null, 2)}</pre>`;
-                })
-                .catch(error => {
-                    console.error('提交出错:', error);
-                    document.getElementById('postResult').innerHTML = '提交失败！';
-                });
-        });
-
-        // --- Axios Async/Await GET 请求 ---
-        document.getElementById('asyncFetchButton').addEventListener('click', async () => {
-            try {
-                const response = await axios.get('https://jsonplaceholder.typicode.com/users');
-                const users = response.data;
-                let html = '<h3>用户列表 (Async/Await GET)</h3><ul>';
-                users.forEach(user => {
-                    html += `<li>ID: ${user.id}, 姓名: ${user.name}</li>`;
-                });
-                html += '</ul>';
-                document.getElementById('asyncGetResult').innerHTML = html;
-            } catch (error) {
-                console.error('Async请求出错:', error);
-                document.getElementById('asyncGetResult').innerHTML = '请求失败！';
-            }
-        });
-
-        // --- Axios Async/Await POST 请求 ---
-        document.getElementById('asyncPostButton').addEventListener('click', async () => {
-            const title = document.getElementById('asyncTitleInput').value;
-            const body = document.getElementById('asyncBodyInput').value;
-
-            if (!title || !body) {
-                document.getElementById('asyncPostResult').innerHTML = '请输入标题和内容！';
-                return;
-            }
-
-            try {
-                const response = await axios.post('https://jsonplaceholder.typicode.com/posts', {
-                    title: title,
-                    body: body,
-                    userId: 1
-                });
-                document.getElementById('asyncPostResult').innerHTML = 
-                    `<h3>提交成功 (Async/Await POST)</h3><p>返回ID: ${response.data.id}</p><pre>${JSON.stringify(response.data, null, 2)}</pre>`;
-            } catch (error) {
-                console.error('Async提交出错:', error);
-                document.getElementById('asyncPostResult').innerHTML = '提交失败！';
-            }
-        });
-
         // ---------------- 防抖与节流函数定义 ----------------
-        /*
-         防抖函数定义：一定时间内，多次执行，只执行最后一次
-         防抖原理：清除定时器，重新计时，当事件停止触发一段时间后才执行一次
-         用途：搜索框搜索，窗口大小调整或点击的场景等场景，避免频繁触发事件，导致性能问题
-        */
         function debounce(func, delay) {
-            let timer; // 定义一个定时器变量，用于存储setTimeout的返回值
+            let timer;
             return function() {
-                clearTimeout(timer); // 每次触发时，清除之前的定时器，取消之前等待执行的函数
-                timer = setTimeout(() => { // 重新设置一个定时器，delay毫秒后执行传入的函数
-                    func.apply(this, arguments); // 修正this指向并传递所有参数
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    func.apply(this, arguments);
                 }, delay);
             }
         }
 
-        /*
-         节流函数定义：一定时间内，只执行一次
-         节流原理：时间戳对比，在规定的时间内只执行一次
-         用途：适用于滚动事件，鼠标移动，页面缩放等高频率触发场景
-         节流函数：控制函数执行频率的另一种方式
-         场景：避免频繁触发请求，虽然在此短时间内只执行一次
-         用途：搜索框搜索，窗口大小调整或点击的场景等场景，避免频繁触发事件，导致性能问题
-        */
         function throttle(func, delay) {
-            let lastTime = 0; // 记录上一次函数执行的时间戳
+            let lastTime = 0;
             return function() {
-                const now = Date.now(); // 获取当前时间戳
-                // 判断当前时间与上次执行时间的差值是否大于等于指定的延迟时间
+                const now = Date.now();
                 if (now - lastTime >= delay) {
-                    func.apply(this, arguments); // 执行原函数并传递参数
-                    lastTime = now; // 更新上一次执行的时间戳为当前时间
+                    func.apply(this, arguments);
+                    lastTime = now;
                 }
             }
         }
-        
-        // 示例：如何使用防抖/节流绑定到DOM事件
-        // document.getElementById('searchInput').addEventListener('input', debounce(function(e) {
-        //     console.log('搜索请求:', e.target.value);
-        // }, 500));
-        
-    </script>
 
+        // --- 带防抖的 Axios GET 请求 ---
+        document.getElementById("fetchButton").addEventListener('click', debounce(function () {
+            axios.get("https://s5.360game.360.cn/to5/mini/v21/category.html")
+            .then(function (response) {
+                console.log(response, '++++++++++++++++++++++++++++++++++++');
+                const users = response.data.data;
+                console.log(users, '------------------------------------');
+                const resultDiv = document.getElementById("result");
+                resultDiv.innerHTML = '<h2>Users Found:</h2>' + users.map(user =>
+                    `<li>${user.name}</li>`).join('');
+            }).catch(function(error){
+                console.log(error, 'erererererererererererererer+');
+            })
+        }, 1000));
+
+        // --- 带节流的 Axios POST 请求 ---
+        document.getElementById('postButton').addEventListener('click', throttle(function() {
+            const title = document.getElementById('titleInput').value || '默认标题';
+            const body = document.getElementById('bodyInput').value || '默认内容';
+            const postData = {
+                title: title,
+                body: body,
+                userId: 1
+            };
+
+            axios.post('https://jsonplaceholder.typicode.com/posts', postData)
+            .then(function (response) {
+                console.log('post成功++++++++++++', response.data);
+                const postResultDiv = document.getElementById('postResult');
+                postResultDiv.innerHTML = 
+                    `<h3>Post结果</h3>
+                    <p><strong>响应状态：</strong>${response.status}</p>
+                    <p><strong>返回ID：</strong>${response.data.id}</p>
+                    <p><strong>标题：</strong>${response.data.title}</p>
+                    <p><strong>内容：</strong>${response.data.body}</p>`;
+            }).catch(function (error) {
+                console.error('post失败++++++++++++', error);
+                document.getElementById('postResult').innerHTML = 
+                    `<p>提交数据时出错</p><p><strong>错误信息：</strong>${error}</p>`;
+            });
+        }, 2000));
+
+        // --- 带防抖的 Async/Await GET 请求 ---
+        document.getElementById('asyncFetchButton').addEventListener('click', debounce(async function () {
+            try {
+                const response = await axios.get(
+                    'https://s5.360game.360.cn/to5/mini/v21/category.html');
+                console.log(response, 'asyncrerererer+-------------------');
+                const gkeys = response.data.data;
+                console.log(gkeys, '99999999999999999999999');
+                const resultDiv = document.getElementById('asyncGetResult');
+                resultDiv.innerHTML = '<h2>Users Gkey Found:</h2><ul>' + gkeys.map(gkey =>
+                    `<li>${gkey.name}</li>`).join('') + '</ul>';
+            } catch (error) {
+                console.error('get请求失败:', error);
+                document.getElementById('asyncGetResult').innerHTML =
+                    `<p>获取数据时出错</p><p><strong>错误信息</strong>: ${error.message}</p>`;
+            }
+        }, 1000));
+
+        // --- 带节流的 Async/Await POST 请求 ---
+        document.getElementById('asyncPostButton').addEventListener('click', throttle(async function () {
+            try {
+                const title = document.getElementById('asyncTitleInput').value || '默认标题';
+                const body = document.getElementById('asyncBodyInput').value || '默认内容';
+
+                const postData = {
+                    title: title,
+                    body: body,
+                    userId: 2
+                }
+
+                const response = await axios.post('https://jsonplaceholder.typicode.com/posts',
+                    postData);
+                console.log("async post成功-/-/-/-/-/-/-/-/-", response.data);
+                const postResultDiv = document.getElementById('asyncPostResult');
+                postResultDiv.innerHTML =
+                    `<h3>Post结果</h3>
+                    <p><strong>响应状态：</strong>${response.status}</p>
+                    <p><strong>响应id：</strong>${response.data.id}</p>
+                    <p><strong>响应title：</strong>${response.data.title}</p>
+                    <p><strong>响应body：</strong>${response.data.body}</p>`;
+            } catch (error) {
+                console.error('post请求失败:', error);
+                document.getElementById('asyncPostResult').innerHTML =
+                    `<p>提交数据时出错</p><p><strong>错误信息</strong>: ${error.message}</p>`;
+            }
+        }, 2000));
+
+        // --- 初始化 Swiper 轮播 ---
+        let mySwiper = new Swiper('.swiper', {
+            direction: 'horizontal', // 水平切换选项
+            loop: true, // 循环模式选项
+            autoplay: false, // 关闭自动播放
+            effect: 'fade', // 渐隐效果
+            // 分页器
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true, // 允许点击分页器进行切换
+            },
+            // 导航按钮
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+        });
+    </script>
 </body>
 
 </html>
